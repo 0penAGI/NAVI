@@ -3,526 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAVI-AI</title>
+    <title>Люси - Нетраннер</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: flex;
+        @keyframes neon-pulse {
+            0%, 100% { box-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff; }
+            50% { box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff; }
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            height: 100vh;
-            overflow: hidden;
+        .neon-pulse {
+            animation: neon-pulse 3s infinite;
         }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 100%;
+        .chat-window::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .chat-header {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .chat-window::-webkit-scrollbar-track {
+            background: #1a1a1a;
         }
-
-        .bot-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 16px;
+        .chat-window::-webkit-scrollbar-thumb {
+            background: #ff00ff;
+            border-radius: 10px;
         }
-
-        .bot-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 2px;
+        .icon-button {
+            transition: transform 0.2s, color 0.2s;
         }
-
-        .bot-status {
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #888888);
+        .icon-button:hover {
+            transform: scale(1.2);
+            color: #ff66ff;
         }
-
-        .online-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #4CAF50;
-            border-radius: 50%;
-            margin-right: 5px;
-            animation: pulse 2s infinite;
+        .icon-button:active {
+            transform: scale(0.9);
+            color: #ff99ff;
         }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: var(--tg-theme-bg-color, #ffffff);
-        }
-
-        .message {
-            margin-bottom: 16px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-            word-wrap: break-word;
-        }
-
-        .message.user {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .message.user .message-bubble {
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border-bottom-right-radius: 6px;
-        }
-
-        .message.bot {
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        .message.bot .message-bubble {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
-            border-bottom-left-radius: 6px;
-        }
-
-        .message-time {
-            font-size: 11px;
-            color: var(--tg-theme-hint-color, #888888);
-            margin-top: 4px;
-            text-align: right;
-        }
-
-        .message.bot .message-time {
-            text-align: left;
-        }
-
-        .input-container {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 15px 20px;
-            border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .message-input {
-            flex: 1;
-            background: var(--tg-theme-bg-color, #ffffff);
-            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-            border-radius: 20px;
-            padding: 10px 16px;
-            font-size: 16px;
-            color: var(--tg-theme-text-color, #000000);
-            resize: none;
-            max-height: 100px;
-            min-height: 40px;
-            outline: none;
-        }
-
-        .message-input:focus {
-            border-color: var(--tg-theme-button-color, #2481cc);
-        }
-
-        .send-button {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--tg-theme-button-color, #2481cc);
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .send-button:hover {
-            transform: scale(1.05);
-        }
-
-        .send-button:active {
-            transform: scale(0.95);
-        }
-
-        .send-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .typing-indicator {
             display: none;
-            padding: 16px 20px;
-            color: var(--tg-theme-hint-color, #888888);
+            color: #ff66ff;
             font-style: italic;
-            animation: fadeIn 0.3s ease-out;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
-
-        .typing-dots {
-            display: inline-block;
+        .typing-dot {
+            animation: blink 1.4s infinite;
         }
-
-        .typing-dots::after {
-            content: '';
-            animation: dots 1.5s infinite;
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
         }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--tg-theme-hint-color, #888888);
-        }
-
-        .welcome-message h2 {
-            margin-bottom: 10px;
-            color: var(--tg-theme-text-color, #000000);
-        }
-
-        .think-button, .profile-button {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--tg-theme-hint-color, #888888);
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            margin-right: 8px;
-        }
-
-        .think-button:hover, .profile-button:hover {
-            transform: scale(1.05);
-        }
-
-        .think-button:active, .profile-button:active {
-            transform: scale(0.95);
-        }
-
-        .think-button:disabled, .profile-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .think-button.active {
-            background: var(--tg-theme-button-color, #2481cc);
-            animation: thinking 1.5s infinite;
-        }
-
-        @keyframes thinking {
-            0%, 50% { opacity: 1; }
-            25%, 75% { opacity: 0.6; }
-        }
-
-        @media (max-width: 480px) {
-            .messages-container {
-                padding: 15px;
-            }
-            
-            .message-bubble {
-                max-width: 85%;
-            }
-            
-            .input-container {
-                padding: 12px 15px;
-            }
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
         }
     </style>
 </head>
-<body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="bot-avatar">NA</div>
-            <div class="bot-info">
-                <h3>NAVI-AI</h3>
-                <div class="bot-status">
-                    <span class="online-indicator"></span>
-                    0nline
-                </div>
+<body class="bg-gray-900 text-white font-mono min-h-screen flex justify-center items-center">
+    <div class="container w-[360px] h-screen bg-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl">
+        <!-- Header -->
+        <header class="bg-gray-700 p-4 text-center border-b border-gray-600 flex justify-between items-center">
+            <img src="https://i.imgur.com/JQ1ZfLp.png" alt="Люси" class="w-12 h-12 rounded-full neon-pulse">
+            <h1 class="text-lg font-bold">Люси - Нетраннер</h1>
+            <div id="token-balance" class="text-sm text-pink-400">Кристаллы: ∞</div>
+        </header>
+
+        <!-- Chat Window -->
+        <div id="chat-window" class="chat-window flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+            <div class="bot-message bg-gray-700 p-3 rounded-lg max-w-[80%] self-start text-sm">
+                Привет, милая! Я — Люси из Найт-Сити. Что новенького? 🌌
+            </div>
+            <div id="typing-indicator" class="typing-indicator bg-gray-700 p-2 rounded-lg max-w-[50%] self-start text-sm flex items-center">
+                <span class="typing-dot mr-1">•</span>
+                <span class="typing-dot mr-1">•</span>
+                <span class="typing-dot">•</span>
             </div>
         </div>
 
-        <div class="messages-container" id="messagesContainer">
-            <div class="welcome-message">
-                <h2>Добро пожаловать!</h2>
-                <p>Начните общение с NAVI-AI</p>
-            </div>
+        <!-- Input Area -->
+        <div class="input-area p-3 bg-gray-700 border-t border-gray-600 flex items-center gap-2">
+            <textarea id="user-input" placeholder="Напиши мне, милая..." class="flex-1 p-2 bg-gray-600 text-white text-sm rounded-lg resize-none min-h-[40px] max-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off"></textarea>
+            <button id="send-button" class="send-icon icon-button text-pink-400 cursor-pointer" title="Отправить">➤</button>
+            <button id="crystal-button" class="crystal-icon icon-button text-pink-400 cursor-pointer" title="Купить кристаллы">💎</button>
+            <button id="photo-ero-button" class="photo-button icon-button text-pink-400 cursor-pointer" data-mode="ero" title="Фото (Эро)">📸</button>
+            <button id="photo-18-button" class="photo-button icon-button text-pink-400 cursor-pointer" data-mode="18+" title="Фото (18+)">🔞</button>
+            <button id="selector-button" class="selector-button icon-button text-pink-400 cursor-pointer" title="Выбрать персонажа">🌌</button>
         </div>
 
-        <div class="typing-indicator" id="typingIndicator">
-            NAVI-AI печатает<span class="typing-dots"></span>
-        </div>
-
-        <div class="input-container">
-            <button class="profile-button" id="profileButton" title="Профиль">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-            </button>
-            <button class="think-button" id="thinkButton" title="Поиск по Википедии">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-            </button>
-            <textarea 
-                class="message-input" 
-                id="messageInput" 
-                placeholder="..."
-                rows="1"
-                maxlength="4000"
-            ></textarea>
-            <button class="send-button" id="sendButton">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                </svg>
-            </button>
-        </div>
+        <!-- Bottom Navigation -->
+        <nav class="bg-gray-900 p-3 flex justify-around border-t border-gray-600">
+            <a href="#" class="text-pink-400 hover:text-pink-600 flex flex-col items-center">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 21h-3v-2h-2v2H9v-2H7v2H4v-6l8-8 8 8v6zm-10 0h4v-2h-4v2z"/></svg>
+                <span class="text-xs">Чат</span>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-pink-600 flex flex-col items-center">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span class="text-xs">Персонажи</span>
+            </a>
+        </nav>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+        // Telegram WebApp initialization
+        const tg = window.Telegram?.WebApp;
+        let userId = 'local_' + Date.now();
+        let isPremium = false;
+        let lastScreenTime = Date.now();
 
-        const messagesContainer = document.getElementById('messagesContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const thinkButton = document.getElementById('thinkButton');
-        const profileButton = document.getElementById('profileButton');
-        const typingIndicator = document.getElementById('typingIndicator');
-        let thinkMode = false;
-        let ws = null;
-        const WEBSOCKET_URL = "wss://37d4d06c2eca.ngrok-free.app"; // Используем wss:// для WebSocketReplace with your backend WebSocket URL
-
-        function initializeWebSocket() {
-            ws = new WebSocket(WEBSOCKET_URL);
-            ws.onopen = () => {
-                console.log('WebSocket connected');
-                addBotMessage('Соединение с NAVI-AI установлено! Готов к общению 😊');
-            };
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'typing') {
-                        showTyping();
-                    } else if (data.type === 'message') {
-                        hideTyping();
-                        addBotMessage(data.message);
-                    } else if (data.type === 'profile') {
-                        displayProfile(data.profile);
-                    }
-                } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
-                    addBotMessage('Ошибка при получении сообщения. Попробуйте снова.');
-                }
-            };
-            ws.onclose = () => {
-                console.log('WebSocket disconnected, reconnecting...');
-                addBotMessage('Соединение потеряно. Пытаюсь переподключиться...');
-                setTimeout(initializeWebSocket, 3000);
-            };
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                addBotMessage('Ошибка соединения. Проверьте интернет или попробуйте позже.');
-            };
-        }
-
-        function loadFromLocalStorage() {
-            const cachedMessages = localStorage.getItem('messages');
-            const cachedProfile = localStorage.getItem('profile');
-            if (cachedMessages) {
-                const messages = JSON.parse(cachedMessages);
-                messages.forEach(msg => addMessage(msg.text, msg.isUser));
+        // Initialize WebApp
+        function initWebApp() {
+            if (!tg) {
+                console.error('Telegram WebApp not available');
+                return false;
             }
-            if (cachedProfile) {
-                displayProfile(JSON.parse(cachedProfile));
+            
+            tg.ready();
+            tg.expand();
+            tg.MainButton.hide();
+            
+            if (tg.initDataUnsafe?.user) {
+                userId = tg.initDataUnsafe.user.id;
+                isPremium = tg.initDataUnsafe.user.is_premium || false;
+                console.log('User initialized:', tg.initDataUnsafe.user);
             }
+            
+            return true;
         }
 
-        function saveToLocalStorage(text, isUser) {
-            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
-            messages.push({ text, isUser, timestamp: new Date().toISOString() });
-            if (messages.length > 50) messages.shift(); // Limit to 50 messages
-            localStorage.setItem('messages', JSON.stringify(messages));
+        // API base URL
+        const API_BASE = 'https://37d4d06c2eca.ngrok-free.app';
+
+        // Append message to chat
+        function appendMessage(sender, text) {
+            const chatWindow = document.getElementById('chat-window');
+            const msg = document.createElement('div');
+            msg.className = sender === 'user' 
+                ? 'user-message bg-pink-600 p-3 rounded-lg max-w-[80%] self-end text-sm' 
+                : 'bot-message bg-gray-700 p-3 rounded-lg max-w-[80%] self-start text-sm';
+            msg.textContent = text;
+            chatWindow.appendChild(msg);
+            scrollChat();
         }
 
-        function addMessage(text, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-            const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            messageDiv.innerHTML = `
-                <div class="message-bubble">
-                    ${isUser ? text.replace(/\n/g, '<br>') : marked.parse(text)}
-                    <div class="message-time">${now}</div>
-                </div>
-            `;
-            const welcomeMessage = messagesContainer.querySelector('.welcome-message');
-            if (welcomeMessage) welcomeMessage.remove();
-            messagesContainer.appendChild(messageDiv);
-            scrollToBottom();
-            saveToLocalStorage(text, isUser);
-        }
-
-        function addBotMessage(text) {
-            addMessage(text, false);
-        }
-
-        function addUserMessage(text) {
-            addMessage(text, true);
-        }
-
-        function displayProfile(profile) {
-            const profileText = Object.entries(profile)
-                .filter(([key, value]) => value && !['tg_id', 'telegram_user', 'history', 'mood_history', 'asked_questions'].includes(key))
-                .map(([key, value]) => `${key}: ${value}`)
-                .join('\n');
-            addBotMessage(`📋 Ваш профиль:\n\n${profileText || 'Профиль пуст.'}`);
-            localStorage.setItem('profile', JSON.stringify(profile));
-        }
-
-        function scrollToBottom() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
+        // Show typing indicator
         function showTyping() {
-            typingIndicator.style.display = 'block';
-            scrollToBottom();
+            const typing = document.getElementById('typing-indicator');
+            typing.style.display = 'flex';
+            scrollChat();
         }
 
+        // Hide typing indicator
         function hideTyping() {
-            typingIndicator.style.display = 'none';
+            document.getElementById('typing-indicator').style.display = 'none';
         }
 
-        function toggleThink() {
-            thinkMode = !thinkMode;
-            thinkButton.classList.toggle('active', thinkMode);
-            thinkButton.title = thinkMode ? 'Think mode включен (поиск Википедии)' : 'Поиск по Википедии';
-            messageInput.placeholder = thinkMode ? 'Сообщение с поиском по Википедии...' : 'Напишите сообщение...';
-            vibrate();
+        // Scroll chat to bottom
+        function scrollChat() {
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
-                if (!ws || ws.readyState !== WebSocket.OPEN) {
-                    addBotMessage('Нет соединения с сервером. Пожалуйста, подождите...');
+        // Send message to backend
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            appendMessage('user', message);
+            input.value = '';
+            showTyping();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/pulse`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({
+                        pulse: message,
+                        userId,
+                        isPremium
+                    })
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                
+                if (data.error) {
+                    appendMessage('bot', `Ошибка: ${data.error}`);
+                } else {
+                    appendMessage('bot', data.text);
                 }
-                return;
-            }
-            const messageText = thinkMode ? `🧠 ${text}` : text;
-            addUserMessage(messageText);
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
-            sendButton.disabled = true;
-            ws.send(JSON.stringify({
-                type: 'message',
-                message: thinkMode ? text : messageText,
-                isThinkMode: thinkMode,
-                userId: tg.initDataUnsafe.user?.id || 'anonymous'
-            }));
-            if (thinkMode) toggleThink();
-        }
-
-        function vibrate() {
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            } else if (navigator.vibrate) {
-                navigator.vibrate(50);
+            } catch (error) {
+                hideTyping();
+                console.error('Error sending message:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
             }
         }
 
+        // Buy crystals
+        async function buyCrystals() {
+            try {
+                const response = await fetch(`${API_BASE}/api/buy_crystals`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ userId, amount: 10 })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    appendMessage('bot', `Ошибка: ${data.error}`);
+                } else {
+                    appendMessage('bot', `+10 кристаллов! Баланс: ${data.balance} 💎`);
+                }
+            } catch (error) {
+                console.error('Error buying crystals:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
+            }
+        }
+
+        // Request photo
+        async function requestPhoto(mode) {
+            try {
+                const response = await fetch(`${API_BASE}/api/request_photo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ 
+                        userId, 
+                        mode, 
+                        cost: mode === 'ero' ? 5 : 10 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    appendMessage('bot', data.error);
+                } else if (data.image) {
+                    appendMessage('bot', `Снимок (${mode})! 🔥`);
+                    const img = document.createElement('img');
+                    img.src = data.image + '?' + new Date().getTime();
+                    img.className = 'max-w-full mt-3 rounded-lg';
+                    img.alt = `Снимок (${mode})`;
+                    document.getElementById('chat-window').appendChild(img);
+                    scrollChat();
+                }
+            } catch (error) {
+                console.error('Error requesting photo:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
+            }
+        }
+
+        // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
-            const user = tg.initDataUnsafe.user || { first_name: 'Пользователь', id: 'anonymous' };
-            setTimeout(() => {
-                addBotMessage(`Привет, ${user.first_name}! 👋\n\nЯ IE-Bot, ваш персональный помощник. Готов помочь вам с любыми вопросами!`);
-            }, 1000);
+            // Initialize WebApp
+            if (!initWebApp()) {
+                appendMessage('bot', 'Ошибка: Открой меня в Telegram для полного функционала!');
+            }
 
-            messageInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-                sendButton.disabled = !this.value.trim();
-            });
-
-            messageInput.addEventListener('keydown', (e) => {
+            // Bind button events
+            document.getElementById('send-button').addEventListener('click', sendMessage);
+            document.getElementById('crystal-button').addEventListener('click', buyCrystals);
+            document.getElementById('photo-ero-button').addEventListener('click', () => requestPhoto('ero'));
+            document.getElementById('photo-18-button').addEventListener('click', () => requestPhoto('18+'));
+            
+            // Enter key to send message
+            document.getElementById('user-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
                 }
             });
-
-            sendButton.addEventListener('click', sendMessage);
-            thinkButton.addEventListener('click', toggleThink);
-            profileButton.addEventListener('click', () => {
-                if (!ws || ws.readyState !== WebSocket.OPEN) {
-                    addBotMessage('Нет соединения с сервером. Пожалуйста, подождите...');
-                    return;
-                }
-                ws.send(JSON.stringify({ type: 'profile', userId: tg.initDataUnsafe.user?.id || 'anonymous' }));
+            
+            // Auto-resize textarea
+            document.getElementById('user-input').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
-
-            initializeWebSocket();
-            loadFromLocalStorage();
-            tg.ready();
+            
+            // Focus input on load
+            document.getElementById('user-input').focus();
         });
     </script>
 </body>
