@@ -3,213 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Космический Проводник</title>
+    <title>Люси - Нетраннер</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @keyframes star-pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+        @keyframes neon-pulse {
+            0%, 100% { box-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff; }
+            50% { box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff; }
         }
-        @keyframes nebula-glow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .cosmic-bg {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: nebula-glow 20s ease infinite;
-        }
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: star-pulse 3s infinite alternate;
-        }
-        .message-bubble {
-            position: relative;
-            overflow: hidden;
-        }
-        .message-bubble::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .message-bubble:hover::after {
-            opacity: 1;
+        .neon-pulse {
+            animation: neon-pulse 3s infinite;
         }
         .chat-window::-webkit-scrollbar {
-            width: 5px;
+            width: 6px;
+        }
+        .chat-window::-webkit-scrollbar-track {
+            background: #1a1a1a;
         }
         .chat-window::-webkit-scrollbar-thumb {
-            background: #4f46e5;
+            background: #ff00ff;
             border-radius: 10px;
         }
-        .typing-indicator span {
-            animation: blink 1.4s infinite both;
+        .icon-button {
+            transition: transform 0.2s, color 0.2s;
         }
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
+        .icon-button:hover {
+            transform: scale(1.2);
+            color: #ff66ff;
         }
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
+        .icon-button:active {
+            transform: scale(0.9);
+            color: #ff99ff;
+        }
+        .typing-indicator {
+            display: none;
+            color: #ff66ff;
+            font-style: italic;
         }
         @keyframes blink {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .typing-dot {
+            animation: blink 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
         }
     </style>
 </head>
-<body class="cosmic-bg text-gray-100 font-sans min-h-screen flex justify-center items-center p-4">
-    <div class="container max-w-md h-[90vh] bg-gray-900 bg-opacity-70 rounded-xl flex flex-col overflow-hidden shadow-2xl backdrop-blur-sm border border-gray-700 relative">
-        <!-- Звездный фон -->
-        <div id="stars-container" class="absolute inset-0 overflow-hidden"></div>
-        
+<body class="bg-gray-900 text-white font-mono min-h-screen flex justify-center items-center">
+    <div class="container w-[360px] h-screen bg-gray-800 rounded-xl flex flex-col overflow-hidden shadow-2xl">
         <!-- Header -->
-        <header class="bg-gray-800 p-4 border-b border-gray-700 flex items-center justify-between z-10">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-xl">🌌</div>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-300">
-                    Космический Проводник
-                </h1>
-            </div>
-            <div id="connection-status" class="flex items-center text-xs">
-                <span class="w-2 h-2 rounded-full bg-green-500 mr-1"></span>
-                <span>online</span>
-            </div>
+        <header class="bg-gray-700 p-4 text-center border-b border-gray-600 flex justify-between items-center">
+            <img src="https://i.imgur.com/JQ1ZfLp.png" alt="Люси" class="w-12 h-12 rounded-full neon-pulse">
+            <h1 class="text-lg font-bold">Люси - Нетраннер</h1>
+            <div id="token-balance" class="text-sm text-pink-400">Кристаллы: ∞</div>
         </header>
 
         <!-- Chat Window -->
-        <div id="chat-window" class="chat-window flex-1 p-4 overflow-y-auto flex flex-col gap-3 z-10">
-            <div class="bot-message message-bubble bg-gray-800 p-3 rounded-lg max-w-[85%] self-start border border-gray-700">
-                Привет, путник! Я здесь, чтобы вести тебя через звёзды и тени. Куда направим наш путь сегодня? 🌠
+        <div id="chat-window" class="chat-window flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+            <div class="bot-message bg-gray-700 p-3 rounded-lg max-w-[80%] self-start text-sm">
+                Привет, милая! Я — Люси из Найт-Сити. Что новенького? 🌌
             </div>
-            <div id="typing-indicator" class="typing-indicator hidden bg-gray-800 p-2 rounded-lg max-w-[50%] self-start text-sm">
-                <span>•</span><span>•</span><span>•</span>
+            <div id="typing-indicator" class="typing-indicator bg-gray-700 p-2 rounded-lg max-w-[50%] self-start text-sm flex items-center">
+                <span class="typing-dot mr-1">•</span>
+                <span class="typing-dot mr-1">•</span>
+                <span class="typing-dot">•</span>
             </div>
         </div>
 
         <!-- Input Area -->
-        <div class="input-area p-3 bg-gray-800 border-t border-gray-700 flex items-center gap-2 z-10">
-            <textarea id="user-input" placeholder="Твой вопрос к вселенной..." class="flex-1 p-3 bg-gray-700 text-white text-sm rounded-lg resize-none min-h-[50px] max-h-[150px] focus:outline-none focus:ring-2 focus:ring-purple-500 border border-gray-600"></textarea>
-            <button id="send-button" class="send-button w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white hover:from-purple-700 hover:to-blue-600 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
-                </svg>
-            </button>
+        <div class="input-area p-3 bg-gray-700 border-t border-gray-600 flex items-center gap-2">
+            <textarea id="user-input" placeholder="Напиши мне, милая..." class="flex-1 p-2 bg-gray-600 text-white text-sm rounded-lg resize-none min-h-[40px] max-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-500" autocomplete="off"></textarea>
+            <button id="send-button" class="send-icon icon-button text-pink-400 cursor-pointer" title="Отправить">➤</button>
+            <button id="crystal-button" class="crystal-icon icon-button text-pink-400 cursor-pointer" title="Купить кристаллы">💎</button>
+            <button id="photo-ero-button" class="photo-button icon-button text-pink-400 cursor-pointer" data-mode="ero" title="Фото (Эро)">📸</button>
+            <button id="photo-18-button" class="photo-button icon-button text-pink-400 cursor-pointer" data-mode="18+" title="Фото (18+)">🔞</button>
+            <button id="selector-button" class="selector-button icon-button text-pink-400 cursor-pointer" title="Выбрать персонажа">🌌</button>
         </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bg-gray-900 p-3 flex justify-around border-t border-gray-600">
+            <a href="#" class="text-pink-400 hover:text-pink-600 flex flex-col items-center">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 21h-3v-2h-2v2H9v-2H7v2H4v-6l8-8 8 8v6zm-10 0h4v-2h-4v2z"/></svg>
+                <span class="text-xs">Чат</span>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-pink-600 flex flex-col items-center">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span class="text-xs">Персонажи</span>
+            </a>
+        </nav>
     </div>
 
     <script>
-        // Инициализация звездного фона
-        function createStars() {
-            const container = document.getElementById('stars-container');
-            const starCount = 100;
-            
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                
-                // Случайные параметры звезды
-                const size = Math.random() * 2;
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                const delay = Math.random() * 5;
-                const duration = 2 + Math.random() * 3;
-                
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.left = `${posX}%`;
-                star.style.top = `${posY}%`;
-                star.style.animationDelay = `${delay}s`;
-                star.style.animationDuration = `${duration}s`;
-                
-                container.appendChild(star);
-            }
-        }
-
-        // Инициализация Telegram WebApp
+        // Telegram WebApp initialization
         const tg = window.Telegram?.WebApp;
-        const API_BASE = 'https://37d4d06c2eca.ngrok-free.app';
-        let userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        let userId = 'local_' + Date.now();
+        let isPremium = false;
+        let lastScreenTime = Date.now();
 
-        if (tg && tg.initDataUnsafe?.user) {
-            userId = tg.initDataUnsafe.user.id;
+        // Initialize WebApp
+        function initWebApp() {
+            if (!tg) {
+                console.error('Telegram WebApp not available');
+                return false;
+            }
+            
             tg.ready();
             tg.expand();
+            tg.MainButton.hide();
+            
+            if (tg.initDataUnsafe?.user) {
+                userId = tg.initDataUnsafe.user.id;
+                isPremium = tg.initDataUnsafe.user.is_premium || false;
+                console.log('User initialized:', tg.initDataUnsafe.user);
+            }
+            
+            return true;
         }
 
-        // Элементы интерфейса
-        const chatWindow = document.getElementById('chat-window');
-        const userInput = document.getElementById('user-input');
-        const sendButton = document.getElementById('send-button');
-        const typingIndicator = document.getElementById('typing-indicator');
-        const connectionStatus = document.getElementById('connection-status');
+        // API base URL
+        const API_BASE = 'https://f50fc94ac016.ngrok-free.app';
 
-        // Создаем звезды при загрузке
-        createStars();
-
-        // Добавление сообщения в чат
+        // Append message to chat
         function appendMessage(sender, text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = sender === 'user' 
-                ? 'user-message message-bubble bg-gradient-to-br from-purple-700 to-blue-600 p-3 rounded-lg max-w-[85%] self-end text-white'
-                : 'bot-message message-bubble bg-gray-800 p-3 rounded-lg max-w-[85%] self-start border border-gray-700';
-            messageDiv.textContent = text;
-            chatWindow.appendChild(messageDiv);
-            scrollToBottom();
+            const chatWindow = document.getElementById('chat-window');
+            const msg = document.createElement('div');
+            msg.className = sender === 'user' 
+                ? 'user-message bg-pink-600 p-3 rounded-lg max-w-[80%] self-end text-sm' 
+                : 'bot-message bg-gray-700 p-3 rounded-lg max-w-[80%] self-start text-sm';
+            msg.textContent = text;
+            chatWindow.appendChild(msg);
+            scrollChat();
         }
 
-        // Прокрутка к последнему сообщению
-        function scrollToBottom() {
+        // Show typing indicator
+        function showTyping() {
+            const typing = document.getElementById('typing-indicator');
+            typing.style.display = 'flex';
+            scrollChat();
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+
+        // Scroll chat to bottom
+        function scrollChat() {
+            const chatWindow = document.getElementById('chat-window');
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // Показать индикатор набора
-        function showTyping() {
-            typingIndicator.classList.remove('hidden');
-            scrollToBottom();
-        }
-
-        // Скрыть индикатор набора
-        function hideTyping() {
-            typingIndicator.classList.add('hidden');
-        }
-
-        // Проверка соединения
-        async function checkConnection() {
-            try {
-                const response = await fetch(`${API_BASE}/health`, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' }
-                });
-                return response.ok;
-            } catch {
-                return false;
-            }
-        }
-
-        // Отправка сообщения
+        // Send message to backend
         async function sendMessage() {
-            const message = userInput.value.trim();
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
             if (!message) return;
-
+            
             appendMessage('user', message);
-            userInput.value = '';
+            input.value = '';
             showTyping();
-
+            
             try {
-                const isConnected = await checkConnection();
-                if (!isConnected) {
-                    throw new Error('Нет соединения с сервером');
-                }
-
                 const response = await fetch(`${API_BASE}/api/pulse`, {
                     method: 'POST',
                     headers: {
@@ -219,54 +180,115 @@
                     body: JSON.stringify({
                         pulse: message,
                         userId,
-                        isPremium: tg?.initDataUnsafe?.user?.is_premium || false
+                        isPremium
                     })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-
+                
                 const data = await response.json();
                 hideTyping();
                 
                 if (data.error) {
-                    appendMessage('bot', `🌌 Космическая помеха: ${data.error}`);
+                    appendMessage('bot', `Ошибка: ${data.error}`);
                 } else {
                     appendMessage('bot', data.text);
                 }
             } catch (error) {
                 hideTyping();
-                console.error('Ошибка:', error);
-                
-                let errorMessage = '🌀 Космическая связь нарушена...';
-                if (error.message.includes('Нет соединения')) {
-                    errorMessage = '🌑 Нет связи с сервером. Проверь подключение к космосу!';
-                } else if (error.message.includes('Ошибка сервера')) {
-                    errorMessage = '⚡ Сервер временно недоступен. Попробуй позже.';
-                }
-                
-                appendMessage('bot', errorMessage);
+                console.error('Error sending message:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
             }
         }
 
-        // Обработчики событий
-        sendButton.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+        // Buy crystals
+        async function buyCrystals() {
+            try {
+                const response = await fetch(`${API_BASE}/api/buy_crystals`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ userId, amount: 10 })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    appendMessage('bot', `Ошибка: ${data.error}`);
+                } else {
+                    appendMessage('bot', `+10 кристаллов! Баланс: ${data.balance} 💎`);
+                }
+            } catch (error) {
+                console.error('Error buying crystals:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
             }
-        });
+        }
 
-        // Автоматическое изменение высоты textarea
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
-        });
+        // Request photo
+        async function requestPhoto(mode) {
+            try {
+                const response = await fetch(`${API_BASE}/api/request_photo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ 
+                        userId, 
+                        mode, 
+                        cost: mode === 'ero' ? 5 : 10 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    appendMessage('bot', data.error);
+                } else if (data.image) {
+                    appendMessage('bot', `Снимок (${mode})! 🔥`);
+                    const img = document.createElement('img');
+                    img.src = data.image + '?' + new Date().getTime();
+                    img.className = 'max-w-full mt-3 rounded-lg';
+                    img.alt = `Снимок (${mode})`;
+                    document.getElementById('chat-window').appendChild(img);
+                    scrollChat();
+                }
+            } catch (error) {
+                console.error('Error requesting photo:', error);
+                appendMessage('bot', 'Сбой сети, попробуй снова! 😕');
+            }
+        }
 
-        // Фокус на поле ввода при загрузке
-        userInput.focus();
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize WebApp
+            if (!initWebApp()) {
+                appendMessage('bot', 'Ошибка: Открой меня в Telegram для полного функционала!');
+            }
+
+            // Bind button events
+            document.getElementById('send-button').addEventListener('click', sendMessage);
+            document.getElementById('crystal-button').addEventListener('click', buyCrystals);
+            document.getElementById('photo-ero-button').addEventListener('click', () => requestPhoto('ero'));
+            document.getElementById('photo-18-button').addEventListener('click', () => requestPhoto('18+'));
+            
+            // Enter key to send message
+            document.getElementById('user-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Auto-resize textarea
+            document.getElementById('user-input').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+            
+            // Focus input on load
+            document.getElementById('user-input').focus();
+        });
     </script>
 </body>
 </html>
