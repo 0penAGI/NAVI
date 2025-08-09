@@ -352,26 +352,39 @@
         const typingIndicator = document.getElementById('typingIndicator');
         let thinkMode = false;
         let ws = null;
+        const WEBSOCKET_URL = 'wss://your-backend-domain.com/ws'; // Replace with your backend WebSocket URL
 
         function initializeWebSocket() {
-            ws = new WebSocket('wss://your-api-url/ws');
-            ws.onopen = () => console.log('WebSocket connected');
+            ws = new WebSocket(WEBSOCKET_URL);
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                addBotMessage('Соединение с IE-Bot установлено! Готов к общению 😊');
+            };
             ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === 'typing') {
-                    showTyping();
-                } else if (data.type === 'message') {
-                    hideTyping();
-                    addBotMessage(data.message);
-                } else if (data.type === 'profile') {
-                    displayProfile(data.profile);
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'typing') {
+                        showTyping();
+                    } else if (data.type === 'message') {
+                        hideTyping();
+                        addBotMessage(data.message);
+                    } else if (data.type === 'profile') {
+                        displayProfile(data.profile);
+                    }
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                    addBotMessage('Ошибка при получении сообщения. Попробуйте снова.');
                 }
             };
             ws.onclose = () => {
                 console.log('WebSocket disconnected, reconnecting...');
+                addBotMessage('Соединение потеряно. Пытаюсь переподключиться...');
                 setTimeout(initializeWebSocket, 3000);
             };
-            ws.onerror = (error) => console.error('WebSocket error:', error);
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addBotMessage('Ошибка соединения. Проверьте интернет или попробуйте позже.');
+            };
         }
 
         function loadFromLocalStorage() {
@@ -450,7 +463,12 @@
 
         function sendMessage() {
             const text = messageInput.value.trim();
-            if (!text) return;
+            if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    addBotMessage('Нет соединения с сервером. Пожалуйста, подождите...');
+                }
+                return;
+            }
             const messageText = thinkMode ? `🧠 ${text}` : text;
             addUserMessage(messageText);
             messageInput.value = '';
@@ -495,13 +513,16 @@
             sendButton.addEventListener('click', sendMessage);
             thinkButton.addEventListener('click', toggleThink);
             profileButton.addEventListener('click', () => {
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    addBotMessage('Нет соединения с сервером. Пожалуйста, подождите...');
+                    return;
+                }
                 ws.send(JSON.stringify({ type: 'profile', userId: tg.initDataUnsafe.user?.id || 'anonymous' }));
             });
 
             initializeWebSocket();
             loadFromLocalStorage();
             tg.ready();
-            
         });
     </script>
 </body>
