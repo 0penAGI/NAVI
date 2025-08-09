@@ -292,12 +292,12 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <div class="bot-avatar">IE</div>
+            <div class="bot-avatar">NA</div>
             <div class="bot-info">
-                <h3>IE-Bot</h3>
+                <h3>NAVI-AI</h3>
                 <div class="bot-status">
                     <span class="online-indicator"></span>
-                    Online
+                    0nline
                 </div>
             </div>
         </div>
@@ -352,13 +352,13 @@
         const typingIndicator = document.getElementById('typingIndicator');
         let thinkMode = false;
         let ws = null;
-        const WEBSOCKET_URL = https://37d4d06c2eca.ngrok-free.app; // Replace with your backend WebSocket URL
+        const WEBSOCKET_URL = "https://37d4d06c2eca.ngrok-free.app";  // Replace with your backend WebSocket URL
 
         function initializeWebSocket() {
             ws = new WebSocket(WEBSOCKET_URL);
             ws.onopen = () => {
                 console.log('WebSocket connected');
-                addBotMessage('Соединение с IE-Bot установлено! Готов к общению 😊');
+                addBotMessage('Соединение с NAVI-AI установлено! Готов к общению 😊');
             };
             ws.onmessage = (event) => {
                 try {
