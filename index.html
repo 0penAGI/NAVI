@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -13,284 +12,281 @@
             box-sizing: border-box;
         }
 
-```
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: var(--tg-theme-bg-color, #ffffff);
-        color: var(--tg-theme-text-color, #000000);
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .chat-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        max-width: 100%;
-    }
-
-    .chat-header {
-        background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        padding: 15px 20px;
-        border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .bot-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: white;
-        font-size: 16px;
-    }
-
-    .bot-info h3 {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-
-    .bot-status {
-        font-size: 12px;
-        color: var(--tg-theme-hint-color, #888888);
-    }
-
-    .online-indicator {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #4CAF50;
-        border-radius: 50%;
-        margin-right: 5px;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
-
-    .messages-container {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-        background: var(--tg-theme-bg-color, #ffffff);
-    }
-
-    .message {
-        margin-bottom: 16px;
-        animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            height: 100vh;
+            overflow: hidden;
         }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
         }
-    }
 
-    .message-bubble {
-        max-width: 80%;
-        padding: 12px 16px;
-        border-radius: 18px;
-        position: relative;
-        word-wrap: break-word;
-    }
+        .chat-header {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .message.user {
-        display: flex;
-        justify-content: flex-end;
-    }
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
 
-    .message.user .message-bubble {
-        background: var(--tg-theme-button-color, #2481cc);
-        color: var(--tg-theme-button-text-color, #ffffff);
-        border-bottom-right-radius: 6px;
-    }
+        .bot-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
 
-    .message.bot {
-        display: flex;
-        justify-content: flex-start;
-    }
+        .bot-status {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #888888);
+        }
 
-    .message.bot .message-bubble {
-        background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        color: var(--tg-theme-text-color, #000000);
-        border-bottom-left-radius: 6px;
-    }
+        .online-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
 
-    .message-time {
-        font-size: 11px;
-        color: var(--tg-theme-hint-color, #888888);
-        margin-top: 4px;
-        text-align: right;
-    }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
-    .message.bot .message-time {
-        text-align: left;
-    }
-
-    .input-container {
-        background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-        padding: 15px 20px;
-        border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-    }
-
-    .message-input {
-        flex: 1;
-        background: var(--tg-theme-bg-color, #ffffff);
-        border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-        border-radius: 20px;
-        padding: 10px 16px;
-        font-size: 16px;
-        color: var(--tg-theme-text-color, #000000);
-        resize: none;
-        max-height: 100px;
-        min-height: 40px;
-        outline: none;
-    }
-
-    .message-input:focus {
-        border-color: var(--tg-theme-button-color, #2481cc);
-    }
-
-    .send-button {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: var(--tg-theme-button-color, #2481cc);
-        border: none;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .send-button:hover {
-        transform: scale(1.05);
-    }
-
-    .send-button:active {
-        transform: scale(0.95);
-    }
-
-    .send-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .typing-indicator {
-        display: none;
-        padding: 16px 20px;
-        color: var(--tg-theme-hint-color, #888888);
-        font-style: italic;
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .typing-dots {
-        display: inline-block;
-    }
-
-    .typing-dots::after {
-        content: '';
-        animation: dots 1.5s infinite;
-    }
-
-    @keyframes dots {
-        0%, 20% { content: '.'; }
-        40% { content: '..'; }
-        60%, 100% { content: '...'; }
-    }
-
-    .welcome-message {
-        text-align: center;
-        padding: 40px 20px;
-        color: var(--tg-theme-hint-color, #888888);
-    }
-
-    .welcome-message h2 {
-        margin-bottom: 10px;
-        color: var(--tg-theme-text-color, #000000);
-    }
-
-    .think-button {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: var(--tg-theme-hint-color, #888888);
-        border: none;
-        color: white;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        margin-right: 8px;
-    }
-
-    .think-button:hover {
-        transform: scale(1.05);
-    }
-
-    .think-button:active {
-        transform: scale(0.95);
-    }
-
-    .think-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .think-button.active {
-        background: var(--tg-theme-button-color, #2481cc);
-        animation: thinking 1.5s infinite;
-    }
-
-    @keyframes thinking {
-        0%, 50% { opacity: 1; }
-        25%, 75% { opacity: 0.6; }
-    }
-
-    @media (max-width: 480px) {
         .messages-container {
-            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--tg-theme-bg-color, #ffffff);
         }
-        
-        .message-bubble {
-            max-width: 85%;
-        }
-        
-        .input-container {
-            padding: 12px 15px;
-        }
-    }
-</style>
-```
 
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.user .message-bubble {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-bottom-right-radius: 6px;
+        }
+
+        .message.bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .message.bot .message-bubble {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            border-bottom-left-radius: 6px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #888888);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.bot .message-time {
+            text-align: left;
+        }
+
+        .input-container {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 15px 20px;
+            border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 16px;
+            color: var(--tg-theme-text-color, #000000);
+            resize: none;
+            max-height: 100px;
+            min-height: 40px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .send-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--tg-theme-button-color, #2481cc);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 16px 20px;
+            color: var(--tg-theme-hint-color, #888888);
+            font-style: italic;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color, #888888);
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 10px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .think-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--tg-theme-hint-color, #888888);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .think-button:hover {
+            transform: scale(1.05);
+        }
+
+        .think-button:active {
+            transform: scale(0.95);
+        }
+
+        .think-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .think-button.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            animation: thinking 1.5s infinite;
+        }
+
+        @keyframes thinking {
+            0%, 50% { opacity: 1; }
+            25%, 75% { opacity: 0.6; }
+        }
+
+        @media (max-width: 480px) {
+            .messages-container {
+                padding: 15px;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+            
+            .input-container {
+                padding: 12px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="chat-container">
@@ -305,264 +301,258 @@
             </div>
         </div>
 
-```
-    <div class="messages-container" id="messagesContainer">
-        <div class="welcome-message">
-            <h2>Добро пожаловать!</h2>
-            <p>Начните общение с IE-Bot</p>
+        <div class="messages-container" id="messagesContainer">
+            <div class="welcome-message">
+                <h2>Добро пожаловать!</h2>
+                <p>Начните общение с IE-Bot</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            IE-Bot печатает<span class="typing-dots"></span>
+        </div>
+
+        <div class="input-container">
+            <textarea 
+                class="message-input" 
+                id="messageInput" 
+                placeholder="Напишите сообщение..."
+                rows="1"
+                maxlength="4000"
+            ></textarea>
+            <button class="think-button" id="thinkButton" title="Поиск по Википедии">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </button>
+            <button class="send-button" id="sendButton">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
         </div>
     </div>
 
-
-
-    <div class="typing-indicator" id="typingIndicator">
-        IE-Bot печатает<span class="typing-dots"></span>
-    </div>
-
-    <div class="input-container">
-        <textarea 
-            class="message-input" 
-            id="messageInput" 
-            placeholder="Напишите сообщение..."
-            rows="1"
-            maxlength="4000"
-        ></textarea>
-        <button class="think-button" id="thinkButton" onclick="toggleThink()" title="Поиск по Википедии">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-        </button>
-        <button class="send-button" id="sendButton" onclick="sendMessage()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-        </button>
-    </div>
-</div>
-
-<script>
-    // Инициализация Telegram Web App
-    let tg = window.Telegram.WebApp;
-    
-    // Настройки интерфейса
-    tg.expand();
-    tg.enableClosingConfirmation();
-    
-    // Элементы DOM
-    const messagesContainer = document.getElementById('messagesContainer');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const thinkButton = document.getElementById('thinkButton');
-    const typingIndicator = document.getElementById('typingIndicator');
-
-    // Состояние Think mode
-    let thinkMode = false;
-
-    // Данные пользователя
-    const user = tg.initDataUnsafe.user || { 
-        first_name: 'Пользователь', 
-        id: 'demo_user' 
-    };
-
-    // История сообщений
-    let messages = [];
-
-    // Инициализация
-    document.addEventListener('DOMContentLoaded', function() {
-        // Приветственное сообщение
-        setTimeout(() => {
-            addBotMessage(`Привет, ${user.first_name}! 👋\n\nЯ IE-Bot, ваш персональный помощник. Готов помочь вам с любыми вопросами!`);
-        }, 1000);
-
-        // Настройка input
-        messageInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-            
-            sendButton.disabled = !this.value.trim();
-        });
-
-        messageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Уведомляем Telegram, что приложение готово
-        tg.ready();
-    });
-
-    function addMessage(text, isUser = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
         
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('ru-RU', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        // Настройки интерфейса
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Элементы DOM
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const thinkButton = document.getElementById('thinkButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Состояние Think mode
+        let thinkMode = false;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем данные пользователя из Telegram
+            const user = tg.initDataUnsafe.user || { 
+                first_name: 'Пользователь', 
+                id: Math.random().toString(36).substring(7) 
+            };
+
+            // Приветственное сообщение
+            setTimeout(() => {
+                addBotMessage(`Привет, ${user.first_name}! 👋\n\nЯ IE-Bot, ваш персональный помощник. Готов помочь вам с любыми вопросами!`);
+            }, 1000);
+
+            // Настройка input
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+                
+                sendButton.disabled = !this.value.trim();
+            });
+
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Обработчики кнопок
+            sendButton.addEventListener('click', sendMessage);
+            thinkButton.addEventListener('click', toggleThink);
+
+            // Уведомляем Telegram, что приложение готово
+            tg.ready();
         });
 
-        messageDiv.innerHTML = `
-            <div class="message-bubble">
-                ${text.replace(/\n/g, '<br>')}
-                <div class="message-time">${timeString}</div>
-            </div>
-        `;
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
 
-        // Удаляем welcome message при первом сообщении
-        const welcomeMessage = messagesContainer.querySelector('.welcome-message');
-        if (welcomeMessage) {
-            welcomeMessage.remove();
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    ${text.replace(/\n/g, '<br>')}
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+
+            // Удаляем welcome message при первом сообщении
+            const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+
+            // Отправляем данные в Telegram бота
+            if (isUser) {
+                sendToBot(text);
+            }
         }
 
-        messagesContainer.appendChild(messageDiv);
-        scrollToBottom();
+        function addBotMessage(text) {
+            addMessage(text, false);
+        }
 
-        // Сохраняем в историю
-        messages.push({
-            text: text,
-            isUser: isUser,
-            timestamp: now.toISOString()
-        });
+        function addUserMessage(text) {
+            addMessage(text, true);
+        }
 
-        // Отправляем данные в Telegram
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            tg.sendData(JSON.stringify({
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function toggleThink() {
+            thinkMode = !thinkMode;
+            
+            if (thinkMode) {
+                thinkButton.classList.add('active');
+                thinkButton.title = 'Think mode включен (поиск Википедии)';
+                messageInput.placeholder = 'Сообщение с поиском по Википедии...';
+                vibrate();
+            } else {
+                thinkButton.classList.remove('active');
+                thinkButton.title = 'Поиск по Википедии';
+                messageInput.placeholder = 'Напишите сообщение...';
+            }
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Добавляем индикатор think mode к сообщению
+            const messageText = thinkMode ? `🧠 ${text}` : text;
+            addUserMessage(messageText);
+            
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendButton.disabled = true;
+
+            // Имитация ответа бота с учетом think mode
+            showTyping();
+            const delay = thinkMode ? 2000 + Math.random() * 3000 : 1000 + Math.random() * 2000;
+            
+            setTimeout(() => {
+                hideTyping();
+                
+                // В реальном приложении ответ будет приходить от бота через sendToBot
+                // Здесь оставлено для демонстрации
+                const response = getBotResponse(text, thinkMode);
+                addBotMessage(response);
+                
+                // Сбрасываем think mode после отправки
+                if (thinkMode) {
+                    toggleThink();
+                }
+            }, delay);
+        }
+
+        function sendToBot(text) {
+            // Отправляем сообщение в Telegram бота через WebApp
+            const data = {
                 type: 'message',
                 message: text,
-                isUser: isUser,
-                userId: user.id,
-                timestamp: now.toISOString()
-            }));
-        }
-    }
-
-    function addBotMessage(text) {
-        addMessage(text, false);
-    }
-
-    function addUserMessage(text) {
-        addMessage(text, true);
-    }
-
-    function scrollToBottom() {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    function showTyping() {
-        typingIndicator.style.display = 'block';
-        scrollToBottom();
-    }
-
-    function hideTyping() {
-        typingIndicator.style.display = 'none';
-    }
-
-    function toggleThink() {
-        thinkMode = !thinkMode;
-        
-        if (thinkMode) {
-            thinkButton.classList.add('active');
-            thinkButton.title = 'Think mode включен (поиск Википедии)';
-            messageInput.placeholder = 'Сообщение с поиском по Википедии...';
-            vibrate();
-        } else {
-            thinkButton.classList.remove('active');
-            thinkButton.title = 'Поиск по Википедии';
-            messageInput.placeholder = 'Напишите сообщение...';
-        }
-    }
-
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text) return;
-
-        // Добавляем индикатор think mode к сообщению
-        const messageText = thinkMode ? `🧠 ${text}` : text;
-        addUserMessage(messageText);
-        
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        sendButton.disabled = true;
-
-        // Имитация ответа бота с учетом think mode
-        showTyping();
-        const delay = thinkMode ? 2000 + Math.random() * 3000 : 1000 + Math.random() * 2000;
-        
-        setTimeout(() => {
-            hideTyping();
-            const response = getBotResponse(text, thinkMode);
-            addBotMessage(response);
+                isUser: true,
+                isThinkMode: thinkMode,
+                timestamp: new Date().toISOString()
+            };
             
-            // Сбрасываем think mode после отправки
-            if (thinkMode) {
-                toggleThink();
+            tg.sendData(JSON.stringify(data));
+        }
+
+        function getBotResponse(userMessage, isThinkMode = false) {
+            // В реальном приложении этот метод не нужен, 
+            // так как ответы будут приходить от бота
+            const message = userMessage.toLowerCase();
+            
+            if (isThinkMode) {
+                return `🔍 Поиск по Википедии для: "${userMessage}"\n\nНайдены похожие темы:\n• ${userMessage} - основная статья\n• История ${userMessage.toLowerCase()}\n• Применение в современности\n\n📚 На основе найденной информации: это интересная тема с богатой историей и множеством аспектов для изучения.`;
             }
-        }, delay);
-    }
+            
+            // Обычные ответы
+            if (message.includes('привет') || message.includes('hello') || message.includes('hi')) {
+                return `Привет! 😊 Как дела? Чем могу помочь?`;
+            }
+            
+            if (message.includes('спасибо') || message.includes('thanks')) {
+                return `Пожалуйста! 😊 Рад был помочь. Если есть ещё вопросы - обращайтесь!`;
+            }
+            
+            if (message.includes('пока') || message.includes('bye')) {
+                return `До свидания! 👋 Возвращайтесь, когда понадобится помощь!`;
+            }
 
-
-
-    function getBotResponse(userMessage, isThinkMode = false) {
-        const message = userMessage.toLowerCase();
-        
-        if (isThinkMode) {
-            // Имитация ответа с поиском по Википедии
-            return `🔍 Поиск по Википедии для: "${userMessage}"\n\nНайдены похожие темы:\n• ${userMessage} - основная статья\n• История ${userMessage.toLowerCase()}\n• Применение в современности\n\n📚 На основе найденной информации: это интересная тема с богатой историей и множеством аспектов для изучения.`;
+            // Универсальный ответ
+            const responses = [
+                `Интересный вопрос! Расскажите подробнее.`,
+                `Понимаю вас. Что именно вас интересует?`,
+                `Хороший вопрос! Могу помочь с этим.`,
+                `Давайте разберём это вместе.`,
+                `Интересно! А что вы об этом думаете?`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
         }
-        
-        // Обычные ответы
-        if (message.includes('привет') || message.includes('hello') || message.includes('hi')) {
-            return `Привет, ${user.first_name}! 😊 Как дела? Чем могу помочь?`;
+
+        // Обработка входящих сообщений от бота
+        tg.onEvent('webAppDataReceived', function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'message' && !data.isUser) {
+                    addBotMessage(data.message);
+                }
+            } catch (e) {
+                console.error('Error parsing webAppData:', e);
+            }
+        });
+
+        // Вибрация при отправке сообщения (если поддерживается)
+        function vibrate() {
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            } else if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
-        
-        if (message.includes('спасибо') || message.includes('thanks')) {
-            return `Пожалуйста! 😊 Рад был помочь. Если есть ещё вопросы - обращайтесь!`;
-        }
-        
-        if (message.includes('пока') || message.includes('bye')) {
-            return `До свидания, ${user.first_name}! 👋 Возвращайтесь, когда понадобится помощь!`;
-        }
-
-        // Универсальный ответ
-        const responses = [
-            `Интересный вопрос! Расскажите подробнее.`,
-            `Понимаю вас. Что именно вас интересует?`,
-            `Хороший вопрос! Могу помочь с этим.`,
-            `Давайте разберём это вместе.`,
-            `Интересно! А что вы об этом думаете?`
-        ];
-        
-        return responses[Math.floor(Math.random() * responses.length)];
-    }
-
-    // Обработка закрытия приложения
-    tg.onEvent('mainButtonClicked', function() {
-        tg.close();
-    });
-
-    // Обработка изменения темы
-    tg.onEvent('themeChanged', function() {
-        // Тема автоматически применится через CSS переменные
-        console.log('Theme changed');
-    });
-
-    // Вибрация при отправке сообщения (если поддерживается)
-    function vibrate() {
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
-    // Добавляем вибрацию к отправке
-    const originalSendMessage = sendMessage;
-    sendMessage = function() {
-        vibrate();
-        originalSendMessage();
-    };
-</script>
-```
-
+    </script>
 </body>
 </html>
