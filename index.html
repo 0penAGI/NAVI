@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IE-Bot Chat</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -234,7 +235,7 @@
             color: var(--tg-theme-text-color, #000000);
         }
 
-        .think-button {
+        .think-button, .profile-button {
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -249,15 +250,15 @@
             margin-right: 8px;
         }
 
-        .think-button:hover {
+        .think-button:hover, .profile-button:hover {
             transform: scale(1.05);
         }
 
-        .think-button:active {
+        .think-button:active, .profile-button:active {
             transform: scale(0.95);
         }
 
-        .think-button:disabled {
+        .think-button:disabled, .profile-button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
@@ -313,6 +314,16 @@
         </div>
 
         <div class="input-container">
+            <button class="profile-button" id="profileButton" title="Профиль">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </button>
+            <button class="think-button" id="thinkButton" title="Поиск по Википедии">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </button>
             <textarea 
                 class="message-input" 
                 id="messageInput" 
@@ -320,11 +331,6 @@
                 rows="1"
                 maxlength="4000"
             ></textarea>
-            <button class="think-button" id="thinkButton" title="Поиск по Википедии">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-            </button>
             <button class="send-button" id="sendButton">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -334,89 +340,74 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
-        
-        // Настройки интерфейса
         tg.expand();
         tg.enableClosingConfirmation();
-        
-        // Элементы DOM
+
         const messagesContainer = document.getElementById('messagesContainer');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
         const thinkButton = document.getElementById('thinkButton');
+        const profileButton = document.getElementById('profileButton');
         const typingIndicator = document.getElementById('typingIndicator');
-
-        // Состояние Think mode
         let thinkMode = false;
+        let ws = null;
 
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            // Получаем данные пользователя из Telegram
-            const user = tg.initDataUnsafe.user || { 
-                first_name: 'Пользователь', 
-                id: Math.random().toString(36).substring(7) 
-            };
-
-            // Приветственное сообщение
-            setTimeout(() => {
-                addBotMessage(`Привет, ${user.first_name}! 👋\n\nЯ IE-Bot, ваш персональный помощник. Готов помочь вам с любыми вопросами!`);
-            }, 1000);
-
-            // Настройка input
-            messageInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-                
-                sendButton.disabled = !this.value.trim();
-            });
-
-            messageInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
+        function initializeWebSocket() {
+            ws = new WebSocket('wss://your-api-url/ws');
+            ws.onopen = () => console.log('WebSocket connected');
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'typing') {
+                    showTyping();
+                } else if (data.type === 'message') {
+                    hideTyping();
+                    addBotMessage(data.message);
+                } else if (data.type === 'profile') {
+                    displayProfile(data.profile);
                 }
-            });
+            };
+            ws.onclose = () => {
+                console.log('WebSocket disconnected, reconnecting...');
+                setTimeout(initializeWebSocket, 3000);
+            };
+            ws.onerror = (error) => console.error('WebSocket error:', error);
+        }
 
-            // Обработчики кнопок
-            sendButton.addEventListener('click', sendMessage);
-            thinkButton.addEventListener('click', toggleThink);
+        function loadFromLocalStorage() {
+            const cachedMessages = localStorage.getItem('messages');
+            const cachedProfile = localStorage.getItem('profile');
+            if (cachedMessages) {
+                const messages = JSON.parse(cachedMessages);
+                messages.forEach(msg => addMessage(msg.text, msg.isUser));
+            }
+            if (cachedProfile) {
+                displayProfile(JSON.parse(cachedProfile));
+            }
+        }
 
-            // Уведомляем Telegram, что приложение готово
-            tg.ready();
-        });
+        function saveToLocalStorage(text, isUser) {
+            const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+            messages.push({ text, isUser, timestamp: new Date().toISOString() });
+            if (messages.length > 50) messages.shift(); // Limit to 50 messages
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
 
         function addMessage(text, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-            
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ru-RU', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-
+            const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             messageDiv.innerHTML = `
                 <div class="message-bubble">
-                    ${text.replace(/\n/g, '<br>')}
-                    <div class="message-time">${timeString}</div>
+                    ${isUser ? text.replace(/\n/g, '<br>') : marked.parse(text)}
+                    <div class="message-time">${now}</div>
                 </div>
             `;
-
-            // Удаляем welcome message при первом сообщении
             const welcomeMessage = messagesContainer.querySelector('.welcome-message');
-            if (welcomeMessage) {
-                welcomeMessage.remove();
-            }
-
+            if (welcomeMessage) welcomeMessage.remove();
             messagesContainer.appendChild(messageDiv);
             scrollToBottom();
-
-            // Отправляем данные в Telegram бота
-            if (isUser) {
-                sendToBot(text);
-            }
+            saveToLocalStorage(text, isUser);
         }
 
         function addBotMessage(text) {
@@ -425,6 +416,15 @@
 
         function addUserMessage(text) {
             addMessage(text, true);
+        }
+
+        function displayProfile(profile) {
+            const profileText = Object.entries(profile)
+                .filter(([key, value]) => value && !['tg_id', 'telegram_user', 'history', 'mood_history', 'asked_questions'].includes(key))
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('\n');
+            addBotMessage(`📋 Ваш профиль:\n\n${profileText || 'Профиль пуст.'}`);
+            localStorage.setItem('profile', JSON.stringify(profile));
         }
 
         function scrollToBottom() {
@@ -442,110 +442,29 @@
 
         function toggleThink() {
             thinkMode = !thinkMode;
-            
-            if (thinkMode) {
-                thinkButton.classList.add('active');
-                thinkButton.title = 'Think mode включен (поиск Википедии)';
-                messageInput.placeholder = 'Сообщение с поиском по Википедии...';
-                vibrate();
-            } else {
-                thinkButton.classList.remove('active');
-                thinkButton.title = 'Поиск по Википедии';
-                messageInput.placeholder = 'Напишите сообщение...';
-            }
+            thinkButton.classList.toggle('active', thinkMode);
+            thinkButton.title = thinkMode ? 'Think mode включен (поиск Википедии)' : 'Поиск по Википедии';
+            messageInput.placeholder = thinkMode ? 'Сообщение с поиском по Википедии...' : 'Напишите сообщение...';
+            vibrate();
         }
 
         function sendMessage() {
             const text = messageInput.value.trim();
             if (!text) return;
-
-            // Добавляем индикатор think mode к сообщению
             const messageText = thinkMode ? `🧠 ${text}` : text;
             addUserMessage(messageText);
-            
             messageInput.value = '';
             messageInput.style.height = 'auto';
             sendButton.disabled = true;
-
-            // Имитация ответа бота с учетом think mode
-            showTyping();
-            const delay = thinkMode ? 2000 + Math.random() * 3000 : 1000 + Math.random() * 2000;
-            
-            setTimeout(() => {
-                hideTyping();
-                
-                // В реальном приложении ответ будет приходить от бота через sendToBot
-                // Здесь оставлено для демонстрации
-                const response = getBotResponse(text, thinkMode);
-                addBotMessage(response);
-                
-                // Сбрасываем think mode после отправки
-                if (thinkMode) {
-                    toggleThink();
-                }
-            }, delay);
-        }
-
-        function sendToBot(text) {
-            // Отправляем сообщение в Telegram бота через WebApp
-            const data = {
+            ws.send(JSON.stringify({
                 type: 'message',
-                message: text,
-                isUser: true,
+                message: thinkMode ? text : messageText,
                 isThinkMode: thinkMode,
-                timestamp: new Date().toISOString()
-            };
-            
-            tg.sendData(JSON.stringify(data));
+                userId: tg.initDataUnsafe.user?.id || 'anonymous'
+            }));
+            if (thinkMode) toggleThink();
         }
 
-        function getBotResponse(userMessage, isThinkMode = false) {
-            // В реальном приложении этот метод не нужен, 
-            // так как ответы будут приходить от бота
-            const message = userMessage.toLowerCase();
-            
-            if (isThinkMode) {
-                return `🔍 Поиск по Википедии для: "${userMessage}"\n\nНайдены похожие темы:\n• ${userMessage} - основная статья\n• История ${userMessage.toLowerCase()}\n• Применение в современности\n\n📚 На основе найденной информации: это интересная тема с богатой историей и множеством аспектов для изучения.`;
-            }
-            
-            // Обычные ответы
-            if (message.includes('привет') || message.includes('hello') || message.includes('hi')) {
-                return `Привет! 😊 Как дела? Чем могу помочь?`;
-            }
-            
-            if (message.includes('спасибо') || message.includes('thanks')) {
-                return `Пожалуйста! 😊 Рад был помочь. Если есть ещё вопросы - обращайтесь!`;
-            }
-            
-            if (message.includes('пока') || message.includes('bye')) {
-                return `До свидания! 👋 Возвращайтесь, когда понадобится помощь!`;
-            }
-
-            // Универсальный ответ
-            const responses = [
-                `Интересный вопрос! Расскажите подробнее.`,
-                `Понимаю вас. Что именно вас интересует?`,
-                `Хороший вопрос! Могу помочь с этим.`,
-                `Давайте разберём это вместе.`,
-                `Интересно! А что вы об этом думаете?`
-            ];
-            
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // Обработка входящих сообщений от бота
-        tg.onEvent('webAppDataReceived', function(event) {
-            try {
-                const data = JSON.parse(event.data);
-                if (data.type === 'message' && !data.isUser) {
-                    addBotMessage(data.message);
-                }
-            } catch (e) {
-                console.error('Error parsing webAppData:', e);
-            }
-        });
-
-        // Вибрация при отправке сообщения (если поддерживается)
         function vibrate() {
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('light');
@@ -553,6 +472,36 @@
                 navigator.vibrate(50);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = tg.initDataUnsafe.user || { first_name: 'Пользователь', id: 'anonymous' };
+            setTimeout(() => {
+                addBotMessage(`Привет, ${user.first_name}! 👋\n\nЯ IE-Bot, ваш персональный помощник. Готов помочь вам с любыми вопросами!`);
+            }, 1000);
+
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+                sendButton.disabled = !this.value.trim();
+            });
+
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendButton.addEventListener('click', sendMessage);
+            thinkButton.addEventListener('click', toggleThink);
+            profileButton.addEventListener('click', () => {
+                ws.send(JSON.stringify({ type: 'profile', userId: tg.initDataUnsafe.user?.id || 'anonymous' }));
+            });
+
+            initializeWebSocket();
+            loadFromLocalStorage();
+            tg.ready();
+        });
     </script>
 </body>
 </html>
